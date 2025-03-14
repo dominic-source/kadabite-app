@@ -7,9 +7,11 @@ import { Providers } from './provider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'HNG Boilerplate',
-  description: 'HNG Boilerplate',
+  title: 'Kadabite food delivery', // Replace with your app title
+  description: 'Order food from your favorite restaurants.', // Replace with your app description
+  manifest: '/manifest.json',
 }
+
 export default function RootLayout({
   children,
 }: Readonly<{
