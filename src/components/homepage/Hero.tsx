@@ -16,7 +16,8 @@ const Hero = () => {
         <div className="flex flex-col items-center lg:flex-row">
           <div className="w-full text-center sm:text-left lg:w-1/2">
             <h1 className="mb-2 text-4xl font-bold leading-snug lg:mr-20 lg:text-[50px] lg:leading-tight">
-              Focus on What Matters. We&apos;ve Got the Foundation Covered.
+              Focus on food which really matters We&apos;ve Got the Foundation
+              Covered.
             </h1>
 
             <div className="">

@@ -30,10 +30,10 @@ export const getBaseURL = async (backend?: string) => {
         }
         return baseURL
 
-      case 'php':
-        baseURL = process.env.PHP_BASEURL
+      case 'node':
+        baseURL = process.env.NODE_BASEURL
         if (!baseURL) {
-          throw new Error('PHP_BASEURL environment variable is not defined')
+          throw new Error('NODE_BASEURL environment variable is not defined')
         }
         return baseURL
 
@@ -53,9 +53,9 @@ export const getBaseURL = async (backend?: string) => {
     ) {
       throw error
     } else if (
-      backend === 'php' &&
+      backend === 'node' &&
       error instanceof Error &&
-      error.message.includes('PHP_BASEURL')
+      error.message.includes('NODE_BASEURL')
     ) {
       throw error
     } else if (

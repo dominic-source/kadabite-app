@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 type EnvironmentStore = {
-  backend: '' | 'python' | 'php'
-  setBackend: (backend: 'python' | 'php' | '') => void
+  backend: '' | 'python' | 'node'
+  setBackend: (backend: 'python' | 'node' | '') => void
 }
 
 const useEnvironmentStore = create<EnvironmentStore>()(

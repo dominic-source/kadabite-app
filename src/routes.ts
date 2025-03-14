@@ -42,7 +42,7 @@ export const DEFAULT_LOGIN_REDIRECT: string = '/dashboard'
  */
 export const clientRoutes: string[] = [
   '/dashboard',
-  '/hisory',
+  '/history',
   '/messages',
   '/notifications',
   '/profile',

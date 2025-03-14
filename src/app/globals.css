@@ -20,11 +20,11 @@
     --default: 222 47% 11%;
     --default-foreground: 0 0% 100%;
 
-    --primary: 25 95% 53%;
+    --primary: 42, 100%, 53%;
 
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 0, 0%, 0%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
