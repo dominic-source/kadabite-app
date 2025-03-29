@@ -27,6 +27,7 @@ import { Input } from '../ui/input'
 import GoogleLogo from '../icons/google-logo'
 import { Button } from '../ui/button'
 import FramerButton from '../ui/framer-button'
+import Image from 'next/image'
 
 const Login = () => {
   const router = useRouter()
@@ -82,35 +83,21 @@ const Login = () => {
   return (
     <div className="flex min-h-full items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="font-inter text-neutralColor-dark-2 mb-5 text-center text-2xl font-semibold leading-tight">
-            Login
-          </h1>
-          <p className="font-inter text-neutralColor-dark-2 mt-2 text-center text-sm font-normal leading-6">
-            Welcome back, you&apos;ve been missed!
+        <div className="text-dark text-center">
+          <div className="mb-6 mt-6 flex w-full items-center justify-center">
+            <Image
+              src="/images/welcome-page/kadabiteText.png"
+              alt="Logo 2"
+              width={114}
+              height={29}
+            />
+          </div>
+          <p className="mt-2 text-center font-poppins text-lg font-bold leading-normal md:text-2xl">
+            come find the best food with millions of other people
           </p>
-        </div>
-        <div className="flex flex-col justify-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
-          <Button
-            onClick={async () => {
-              await setBackend(backend)
-              signIn('google', { redirectTo: '/' })
-            }}
-            disabled={isLoading || status === 'authenticated'}
-            variant="outline"
-            className="h-10 w-full gap-x-3"
-          >
-            <GoogleLogo />
-            <span className="h-full w-px bg-gray-300 dark:bg-gray-600" />
-            <span>Continue with Google</span>
-          </Button>
-        </div>
-        <div className="flex items-center justify-center">
-          <hr className="w-full border-t border-gray-300" />
-          <span className="font-inter text-neutralColor-dark-1 px-3 text-xs font-normal leading-tight">
-            OR
-          </span>
-          <hr className="w-full border-t border-gray-300" />
+          <p className="text-neutralColor-dark-2 mt-2 text-center font-poppins text-sm font-light leading-5">
+            Please sign in or register to get started
+          </p>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -211,19 +198,35 @@ const Login = () => {
               isLoading={isLoading}
               disabled={isLoading}
               text="Login"
+              className="rounded-full font-poppins"
             />
           </form>
         </Form>
 
-        <Button
-          asChild
-          variant="outline"
-          size="default"
-          className="w-full py-6"
-          type="button"
-        >
-          <Link href="/login/magic-link">Sign in with magic link</Link>
-        </Button>
+        <div className="flex items-center justify-center">
+          <hr className="w-full border-t border-gray-300" />
+          <span className="text-neutralColor-dark-1 w-full px-3 font-poppins text-xs font-normal leading-tight">
+            Or
+          </span>
+          <hr className="w-full border-t border-gray-300" />
+        </div>
+
+        <div className="flex flex-col justify-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
+          <Button
+            onClick={async () => {
+              await setBackend(backend)
+              signIn('google', { redirectTo: '/' })
+            }}
+            disabled={isLoading || status === 'authenticated'}
+            variant="outline"
+            size="md"
+            className="h-10 w-full gap-x-3"
+          >
+            <GoogleLogo />
+            <span className="h-full w-px bg-gray-300 dark:bg-gray-600" />
+            <span>Continue with Google</span>
+          </Button>
+        </div>
 
         <p className="font-inter text-neutralColor-dark-1 mt-5 text-center text-sm font-normal leading-[15.6px]">
           Don&apos;t Have An Account?{' '}

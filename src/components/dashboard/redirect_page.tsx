@@ -9,7 +9,7 @@ const RedirectPage: React.FC = () => {
   const [state, setState] = useState<'initial' | 'next' | 'final'>('initial')
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const [timeElapsed, setTimeElapsed] = useState(0)
-  const totalTimeLimit = 120
+  const totalTimeLimit = 216
 
   const backgroundColor =
     state === 'initial'
@@ -58,13 +58,13 @@ const RedirectPage: React.FC = () => {
   useEffect(() => {
     if (timeElapsed < totalTimeLimit) {
       intervalRef.current = setInterval(() => {
-        setTimeElapsed((prevTime) => prevTime + 3)
+        setTimeElapsed((prevTime) => prevTime + 4)
         setState((prevState) => {
           if (prevState === 'initial') return 'next'
           if (prevState === 'next') return 'final'
           return 'initial'
         })
-      }, 3000)
+      }, 4000)
     }
 
     return () => {
@@ -127,7 +127,7 @@ const RedirectPage: React.FC = () => {
                 ? 'bg-[hsla(0, 0%, 100%, 0.21)]'
                 : 'bg-[hsla(0, 0%, 100%, 1)]'
             )}
-            onClick={() => (window.location.href = '/dashboard')}
+            onClick={() => (window.location.href = '/signup')}
           >
             Sign Up
           </Button>
@@ -140,7 +140,7 @@ const RedirectPage: React.FC = () => {
                 ? 'hover:bg-white hover:text-black'
                 : ''
             )}
-            onClick={() => (window.location.href = '/dashboard')}
+            onClick={() => (window.location.href = '/dashboard/login')}
           >
             Log In
           </Button>

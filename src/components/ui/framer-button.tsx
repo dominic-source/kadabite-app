@@ -35,7 +35,7 @@ const FramerButton = forwardRef<HTMLButtonElement, Props>(
         type="submit"
         disabled={isLoading || disabled}
         className={cn(
-          'radial-gradient relative flex w-full justify-center rounded-2xl px-6 py-3 text-white',
+          'radial-gradient relative flex w-full justify-center rounded-2xl px-6 py-3 text-black',
           className
         )}
         ref={ref}
@@ -50,7 +50,7 @@ const FramerButton = forwardRef<HTMLButtonElement, Props>(
           <>
             <span
               className={cn(
-                'font-manrope relative block h-full w-full rounded-[inherit] text-xl font-medium tracking-wide text-white',
+                'font-manrope relative block h-full w-full rounded-[inherit] text-xl font-medium tracking-wide text-black',
                 disabled ? '' : 'linear-mask'
               )}
             >
@@ -58,7 +58,7 @@ const FramerButton = forwardRef<HTMLButtonElement, Props>(
             </span>
             <span
               className={cn(
-                'absolute inset-0 block rounded-[inherit] p-px',
+                'absolute block rounded-[inherit] p-px',
                 disabled ? '' : 'linear-overlay'
               )}
             />

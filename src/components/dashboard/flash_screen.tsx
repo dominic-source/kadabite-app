@@ -76,14 +76,14 @@ const FlashScreen: React.FC<FlashScreenProps> = ({
     case 1:
       content = (
         <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-white">
-          <Image src={image1Src} alt="Logo 1" width={200} height={200} />
+          <Image src={image1Src} alt="Logo 1" width={151} height={39} />
         </div>
       )
       break
     case 2:
       content = (
         <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-white">
-          <Image src={image2Src} alt="Logo 2" width={200} height={200} />
+          <Image src={image2Src} alt="Logo 2" width={302} height={77} />
         </div>
       )
       break
