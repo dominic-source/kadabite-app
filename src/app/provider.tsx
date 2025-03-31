@@ -11,7 +11,7 @@ import { SessionProvider } from 'next-auth/react'
 import { Toaster as Sonner } from '~ui/sonner'
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar'
 import { ReactLenis } from 'lenis/react'
-import EnvironmentSwitcher from '~/components/enviroment-switcher'
+// import EnvironmentSwitcher from '~/components/enviroment-switcher'
 
 function makeQueryClient() {
   return new QueryClient({
@@ -56,7 +56,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <ReactLenis root>{children}</ReactLenis>
         <ReactQueryDevtools initialIsOpen={false} />
         <Sonner richColors expand={true} position="top-right" />
-        <EnvironmentSwitcher />
+        {/* <EnvironmentSwitcher /> */}
       </QueryClientProvider>
     </SessionProvider>
   )

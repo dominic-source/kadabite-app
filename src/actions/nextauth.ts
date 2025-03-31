@@ -4,7 +4,7 @@ import * as z from 'zod'
 import { LoginSchema } from '~/schemas'
 import { getBaseURL } from './getenv'
 import { createFetchUtil, HttpError } from './fetchutil'
-import { User } from '~/types'
+import { User, MyGoogleAuth } from '~/types'
 import { cookies } from 'next/headers'
 
 interface LoginResponse {
@@ -41,11 +41,9 @@ export const nextLogin = async (values: z.infer<typeof LoginSchema>) => {
   }
 }
 
-export const googleAuth = async (idToken: string) => {
+export const googleAuth = async (args: MyGoogleAuth) => {
   const cookieStore = await cookies()
   const backend = cookieStore.get('backend')?.value
-
-  console.log(backend)
   const baseURL = await getBaseURL(backend)
   if (!baseURL) {
     return {
@@ -57,17 +55,44 @@ export const googleAuth = async (idToken: string) => {
   const api = createFetchUtil({ baseUrl: baseURL })
 
   try {
-    const res = await api<{ data: LoginResponse; access_token: string }>(
-      '/auth/google',
-      {
-        method: 'POST',
-        body: { id_token: idToken },
+    // Send a backend request (GraphQL mutation) to complete third-party login.
+    const graphqlQuery: {
+      query: string
+      variables: {
+        email?: string
+        firstName?: string
+        lastName?: string
+        middleName?: string
+        imageUrl?: string
       }
-    )
+    } = {
+      query: `
+        mutation thirdPartyLogin($email: String!, $firstName: String!, $lastName: String!, $middleName: String, $imageUrl: String) {
+          thirdPartyLogin(email: $email, firstName: $firstName, lastName: $lastName, middleName: $middleName, imageUrl: $imageUrl) {
+            ok
+            message
+            statusCode
+          }
+        }
+      `,
+      variables: {
+        email: args.email,
+        firstName: args.first_name,
+        lastName: args.last_name,
+        imageUrl: args.avatar_url,
+      },
+    }
 
+    const res = await api<{ data: LoginResponse }>('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${args.jwt_token}`,
+      },
+      body: JSON.stringify(graphqlQuery),
+    })
     return {
-      data: res.data.user,
-      access_token: res.access_token,
+      data: res.data,
       success: true,
     }
   } catch (error) {

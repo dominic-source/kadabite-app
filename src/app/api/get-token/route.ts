@@ -1,63 +1,3 @@
-// import { NextApiRequest, NextApiResponse } from 'next'
-// import { cookies } from 'next/headers'
-// import Cors from 'cors'
-
-// const cors = Cors({
-//     methods: ['GET'],
-//     origin: /\.localhost/, // Adjust this regex to match your subdomains
-//     credentials: true,
-// })
-
-// function runMiddleware(req: NextApiRequest, res: NextApiResponse, fn: Function) {
-//     return new Promise((resolve, reject) => {
-//         fn(req, res, (result: any) => {
-//             if (result instanceof Error) {
-//                 return reject(result)
-//             }
-//             return resolve(result)
-//         })
-//     })
-// }
-
-// export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-//     await runMiddleware(req, res, cors)
-
-//     if (req.method !== 'GET') {
-//         return res.status(405).end()
-//     }
-
-//     const cookieStore = await cookies()
-//     const authToken = cookieStore.get('authToken')
-
-//     if (authToken) {
-//         res.status(200).json({ authToken: authToken.value })
-//     } else {
-//         res.status(401).json({ error: 'No auth token found' })
-//     }
-// }
-
-// // 'use client'
-
-// // export async function getAuthToken(): Promise<string | null> {
-// //     try {
-// //         const response = await fetch('https://yourdomain.com/api/get-auth-token', {
-// //             method: 'GET',
-// //             credentials: 'include', // This is crucial for including cookies in the request
-// //         })
-
-// //         if (response.ok) {
-// //             const data = await response.json()
-// //             return data.authToken
-// //         } else {
-// //             console.error('Failed to fetch auth token')
-// //             return null
-// //         }
-// //     } catch (error) {
-// //         console.error('Error fetching auth token:', error)
-// //         return null
-// //     }
-// // }
-
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
@@ -65,15 +5,13 @@ export const runtime = 'edge'
 
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
+
+  // Check for both auth tokens (regular auth token and Google OAuth tokens)
   const authToken = cookieStore.get('authToken')
-  const allCookie = cookieStore.getAll()
-  console.log('allCookie', allCookie)
+  const accessToken = cookieStore.get('accessToken') // Google OAuth access token
+  const refreshToken = cookieStore.get('refreshToken') // Google OAuth refresh token
 
   const origin = request.headers.get('origin')
-  console.log(request.headers)
-  if (!authToken) {
-    return NextResponse.json({ error: 'No auth token found' }, { status: 401 })
-  }
 
   // Validate the origin
   const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -84,8 +22,71 @@ export async function GET(request: NextRequest) {
     return new NextResponse(null, { status: 403 })
   }
 
+  // If we have neither token type, return an error
+  if (!authToken && !accessToken) {
+    return NextResponse.json(
+      { error: 'No authentication token found' },
+      {
+        status: 401,
+        headers: {
+          'Access-Control-Allow-Origin': origin,
+          'Access-Control-Allow-Credentials': 'true',
+        },
+      }
+    )
+  }
+
+  // If we have an OAuth token but no regular auth token, handle the refresh flow if needed
+  if (!authToken && accessToken && refreshToken) {
+    // Check if the access token is expired (you may need to implement this check)
+    const isAccessTokenExpired = false // Placeholder - implement actual check
+
+    if (isAccessTokenExpired) {
+      try {
+        // Refresh the token
+        const refreshResponse = await fetch(
+          'https://oauth2.googleapis.com/token',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              refresh_token: refreshToken.value,
+              client_id: process.env.GOOGLE_CLIENT_ID || '',
+              client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+              grant_type: 'refresh_token',
+            }).toString(),
+          }
+        )
+
+        if (refreshResponse.ok) {
+          const newTokens = await refreshResponse.json()
+
+          // Return the new access token
+          return NextResponse.json(
+            { accessToken: newTokens.access_token },
+            {
+              status: 200,
+              headers: {
+                'Access-Control-Allow-Origin': origin,
+                'Access-Control-Allow-Credentials': 'true',
+                // You would need to update cookies here as well
+              },
+            }
+          )
+        }
+      } catch (error) {
+        console.error('Error refreshing token:', error)
+      }
+    }
+  }
+
+  // Return the available token (prioritize regular auth token if both exist)
   return NextResponse.json(
-    { authToken: authToken.value },
+    {
+      authToken: authToken?.value,
+      accessToken: accessToken?.value,
+      // Don't return refresh token for security reasons
+    },
     {
       status: 200,
       headers: {

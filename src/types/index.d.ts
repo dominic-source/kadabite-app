@@ -10,19 +10,32 @@ export interface CustomJWT extends JWT {
   last_name?: string
   fullname?: string
   access_token?: string
+  refresh_token?: string
+  role?: string
   organisations?: Organisation[]
 }
 export interface CustomSession extends Session {
   user: {
     id: string
-    first_name: string
-    last_name: string
+    first_name?: string
+    last_name?: string
+    middle_name?: string
     email: string
-    image: string
+    image?: string
   }
   expires: DefaultSession['expires']
   access_token?: string
+  jwt_token?: string
   userOrg?: Organisation[]
+}
+
+export interface MyGoogleAuth {
+  jwt_token?: string
+  email?: string
+  first_name?: string
+  last_name?: string
+  middle_name?: string
+  avatar_url?: string
 }
 
 export interface User {
