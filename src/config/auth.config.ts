@@ -90,7 +90,7 @@ export default {
       const sessionExp = new Date(session.expires)
 
       let jwtToken
-      const nameArray = customToken.name?.split(' ') || []
+      const nameArray = (customToken.name || '').split(' ')
       try {
         // Encode the JWT token with the customToken data
         jwtToken = await encode({
@@ -103,27 +103,32 @@ export default {
           secret: process.env.AUTH_SECRET!,
           salt: '',
         })
-        const argObj = {
-          jwt_token: jwtToken,
-          email: customToken.email,
-          first_name: nameArray[0] || '',
-          last_name:
-            nameArray.length > 1 ? nameArray[nameArray.length - 1] : '',
-          middle_name:
-            nameArray.length > 2 ? nameArray.slice(1, -1).join(' ') : '',
-          avatar_url: customToken.avatar_url,
-        }
 
-        const googleRes = await googleAuth(argObj)
-        if (googleRes.success) {
-          session.jwt_token = jwtToken
+        // Only call googleAuth for Google provider
+        if (customToken.provider === 'google') {
+          const argObj = {
+            jwt_token: jwtToken,
+            email: customToken.email,
+            first_name: nameArray[0] || '',
+            last_name:
+              nameArray.length > 1 ? nameArray[nameArray.length - 1] : '',
+            middle_name:
+              nameArray.length > 2 ? nameArray.slice(1, -1).join(' ') : '',
+            avatar_url: customToken.avatar_url,
+          }
+          const googleRes = await googleAuth(argObj)
+          if (googleRes.success) {
+            session.jwt_token = jwtToken
+          } else {
+            console.error('googleAuth backend login failed:', googleRes.message)
+          }
         } else {
-          console.error('googleAuth backend login failed:', googleRes.message)
+          // For other providers, just set the jwt_token
+          session.jwt_token = jwtToken
         }
       } catch (error) {
         console.error('Error encoding JWT token:', error)
       }
-
       session.user = {
         id: customToken.id as string,
         first_name: nameArray[0] || '',

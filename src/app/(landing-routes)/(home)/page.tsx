@@ -9,22 +9,23 @@ import Video from '~/components/homepage/Video'
 import DashboardNavbar from '~/components/dashboard/navbar'
 import FlashScreen from '~/components/dashboard/flash_screen'
 import RedirectPage from '~/components/dashboard/redirect_page'
-
-// interface HomePageProps {}
+import { useSession } from 'next-auth/react'
 
 const Home: React.FC = () => {
+  const { data: session } = useSession()
   const [showContent, setShowContent] = useState<boolean>(false)
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
 
   useEffect(() => {
     // After the FlashScreen duration, set showContent to true
+    setIsLoggedIn(!!session && !!session.user)
+
     const timer = setTimeout(() => {
       setShowContent(true)
-      setIsLoggedIn(false)
     }, 5000) // Adjust the duration to match your FlashScreen's total duration
 
     return () => clearTimeout(timer) // Clear timeout on unmount
-  }, [])
+  }, [session])
 
   interface FlashScreenProps {
     duration: number
@@ -42,6 +43,9 @@ const Home: React.FC = () => {
     image4Src: '/images/welcome-page/bikeKadabiteNext.png',
   }
 
+  console.log('Is Logged In:', isLoggedIn)
+  console.log('Session Data:', session)
+  console.log('Show Content:', showContent)
   return (
     <>
       <FlashScreen {...flashScreenProps} />

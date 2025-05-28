@@ -17,6 +17,7 @@ export default async function middleware(request: NextRequest) {
   const cookieStore = await cookies()
 
   const isLoggedIn = session !== null
+  console.log('Session:', session)
   const isSuperAdmin = session?.user?.is_superadmin === true
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix)
@@ -24,18 +25,19 @@ export default async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.includes(nextUrl.pathname)
   const isSuperAdminRoute = superAdminRoutes.includes(nextUrl.pathname)
 
-  const authToken = cookieStore.get('authToken')
+  const authToken = session?.jwt_token || cookieStore.get('authToken')?.value
+  if (authToken) {
+    request.headers.set('Authorization', `Bearer ${authToken}`)
+  }
   const domain = inDevEnvironment ? '.localhost' : `.${ROOT_DOMAIN}`
 
-  cookieStore.set('authToken', session?.access_token as string, {
+  cookieStore.set('authToken', session?.jwt_token as string, {
     httpOnly: true,
     secure: !inDevEnvironment,
     sameSite: false,
     domain,
     maxAge: 60 * 60 * 24 * 30,
   })
-
-  console.log({ authToken })
 
   if (isApiAuthRoute) return null
 
