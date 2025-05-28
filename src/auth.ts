@@ -24,6 +24,7 @@ declare module 'next-auth' {
       is_superadmin?: boolean
     } & DefaultSession['user']
     access_token?: string
+    jwt_token?: string
     userOrg?: Organisation[]
   }
 }

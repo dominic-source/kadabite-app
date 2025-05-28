@@ -8,8 +8,13 @@ import { User, MyGoogleAuth } from '~/types'
 import { cookies } from 'next/headers'
 
 interface LoginResponse {
-  user: User
-  access_token: string
+  user?: User
+  access_token?: string
+  refresh_token?: string
+  success?: boolean
+  message?: string
+  statusCode?: number
+  ok?: boolean
 }
 
 export const nextLogin = async (values: z.infer<typeof LoginSchema>) => {
@@ -26,18 +31,75 @@ export const nextLogin = async (values: z.infer<typeof LoginSchema>) => {
   }
   const api = createFetchUtil({ baseUrl: baseURL })
 
-  const response = await api<{ data: LoginResponse; access_token: string }>(
-    '/auth/login',
-    {
-      method: 'POST',
-      body: values,
+  try {
+    // Send a backend request (GraphQL mutation) to complete third-party login.
+    const graphqlQuery: {
+      query: string
+      variables: {
+        email: string
+        password: string
+      }
+    } = {
+      //  login(email: String!, password: String!)
+      query: `
+        mutation login($email: String!, $password: String!) {
+          login(email: $email, $password: $password) {
+            ok
+            message
+            statusCode
+            token
+            refreshToken
+          }
+        }
+      `,
+      variables: {
+        email: values.email || '',
+        password: values.password || '',
+      },
     }
-  )
 
-  return {
-    data: response.data.user,
-    access_token: response.access_token,
-    success: true,
+    const response = await api<{ data: LoginResponse }>('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: graphqlQuery,
+    })
+    if (response.data.ok !== true) {
+      throw new Error(
+        `Login failed: ${response.data.message || 'Unknown error'}`
+      )
+    }
+
+    return {
+      refresh_token: response.data.refresh_token,
+      access_token: response.data.access_token,
+      success: true,
+    }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        message: 'Invalid form data',
+        errors: error.errors,
+      }
+    } else if (error instanceof HttpError) {
+      console.error(
+        'HTTP Error:',
+        error.message,
+        'Status:',
+        error.response.status
+      )
+      return {
+        success: false,
+        message:
+          error.responseBody?.message || `Server error: ${error.message}`,
+        statusCode: error.statusCode,
+        responseBody: error.responseBody,
+      }
+    } else {
+      return { success: false, message: 'An unexpected error occurred' }
+    }
   }
 }
 
@@ -59,15 +121,15 @@ export const googleAuth = async (args: MyGoogleAuth) => {
     const graphqlQuery: {
       query: string
       variables: {
-        email?: string
-        firstName?: string
-        lastName?: string
-        middleName?: string
-        imageUrl?: string
+        email: string
+        firstName: string
+        lastName: string
+        middleName: string
+        imageUrl: string
       }
     } = {
       query: `
-        mutation thirdPartyLogin($email: String!, $firstName: String!, $lastName: String!, $middleName: String, $imageUrl: String) {
+        mutation thirdPartyLogin($email: String!, $firstName: String!, $lastName: String!, $middleName: String!, $imageUrl: String!) {
           thirdPartyLogin(email: $email, firstName: $firstName, lastName: $lastName, middleName: $middleName, imageUrl: $imageUrl) {
             ok
             message
@@ -76,10 +138,11 @@ export const googleAuth = async (args: MyGoogleAuth) => {
         }
       `,
       variables: {
-        email: args.email,
-        firstName: args.first_name,
-        lastName: args.last_name,
-        imageUrl: args.avatar_url,
+        email: args.email || '',
+        firstName: args.first_name || '',
+        lastName: args.last_name || '',
+        middleName: args.middle_name || '',
+        imageUrl: args.avatar_url || '',
       },
     }
 
@@ -89,7 +152,7 @@ export const googleAuth = async (args: MyGoogleAuth) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${args.jwt_token}`,
       },
-      body: JSON.stringify(graphqlQuery),
+      body: graphqlQuery,
     })
     return {
       data: res.data,
